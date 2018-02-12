@@ -11,18 +11,18 @@
   
   
   
-  <meta name="description" content="作者：严肃链接：https://www.zhihu.com/question/19732473/answer/20851256来源：知乎著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 “阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。1.同步与异步同步和异步关注的是消息通信机制 (synchronous communication/">
+  <meta name="description" content="作者：严肃链接：https://www.zhihu.com/question/19732473/answer/20851256来源：知乎著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 “阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。">
 <meta name="keywords" content="同步,异步">
 <meta property="og:type" content="article">
 <meta property="og:title" content="理解同步与异步">
 <meta property="og:url" content="https://wozhizui.github.io/2017/05/07/理解同步和异步/index.html">
 <meta property="og:site_name" content="Iron Man">
-<meta property="og:description" content="作者：严肃链接：https://www.zhihu.com/question/19732473/answer/20851256来源：知乎著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 “阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。1.同步与异步同步和异步关注的是消息通信机制 (synchronous communication/">
+<meta property="og:description" content="作者：严肃链接：https://www.zhihu.com/question/19732473/answer/20851256来源：知乎著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 “阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2017-06-01T07:16:18.000Z">
+<meta property="og:updated_time" content="2018-02-12T09:29:28.278Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="理解同步与异步">
-<meta name="twitter:description" content="作者：严肃链接：https://www.zhihu.com/question/19732473/answer/20851256来源：知乎著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 “阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。1.同步与异步同步和异步关注的是消息通信机制 (synchronous communication/">
+<meta name="twitter:description" content="作者：严肃链接：https://www.zhihu.com/question/19732473/answer/20851256来源：知乎著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 “阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。">
   
     <link rel="alternate" href="/atom.xml" title="Iron Man" type="application/atom+xml">
   
@@ -138,8 +138,8 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>作者：严肃<br>链接：<a href="https://www.zhihu.com/question/19732473/answer/20851256" target="_blank" rel="noopener">https://www.zhihu.com/question/19732473/answer/20851256</a><br>来源：知乎<br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
-<p>“阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。1.同步与异步同步和异步关注的是消息通信机制 (synchronous communication/ asynchronous communication)所谓同步，就是在发出一个<em>调用</em>时，在没有得到结果之前，该<em>调用</em>就不返回。但是一旦调用返回，就得到返回值了。换句话说，就是由<em>调用者</em>主动等待这个<em>调用</em>的结果。而异步则是相反，<em>调用</em>在发出之后，这个调用就直接返回了，所以没有返回结果。换句话说，当一个异步过程调用发出后，调用者不会立刻得到结果。而是在<em>调用</em>发出后，<em>被调用者</em>通过状态、通知来通知调用者，或通过回调函数处理这个调用。典型的异步编程模型比如Node.js举个通俗的例子：你打电话问书店老板有没有《分布式系统》这本书，如果是同步通信机制，书店老板会说，你稍等，”我查一下”，然后开始查啊查，等查好了（可能是5秒，也可能是一天）告诉你结果（返回结果）。而异步通信机制，书店老板直接告诉你我查一下啊，查好了打电话给你，然后直接挂电话了（不返回结果）。然后查好了，他会主动打电话给你。在这里老板通过“回电”这种方式来回调。2. 阻塞与非阻塞阻塞和非阻塞关注的是程序在等待调用结果（消息，返回值）时的状态.阻塞调用是指调用结果返回之前，当前线程会被挂起。调用线程只有在得到结果之后才会返回。非阻塞调用指在不能立刻得到结果之前，该调用不会阻塞当前线程。还是上面的例子，你打电话问书店老板有没有《分布式系统》这本书，你如果是阻塞式调用，你会一直把自己“挂起”，直到得到这本书有没有的结果，如果是非阻塞式调用，你不管老板有没有告诉你，你自己先一边去玩了， 当然你也要偶尔过几分钟check一下老板有没有返回结果。在这里阻塞与非阻塞与是否同步异步无关。跟老板通过什么方式回答你结果无关。</p>
-<p>如果是关心blocking IO/ asynchronous IO, 参考  Unix Network Programming View Book</p>
+<p>“阻塞”与”非阻塞”与”同步”与“异步”不能简单的从字面理解，提供一个从分布式系统角度的回答。<br><a id="more"></a><br>1.同步与异步同步和异步关注的是消息通信机制 (synchronous communication/ asynchronous communication)所谓同步，就是在发出一个<em>调用</em>时，在没有得到结果之前，该<em>调用</em>就不返回。但是一旦调用返回，就得到返回值了。换句话说，就是由<em>调用者</em>主动等待这个<em>调用</em>的结果。而异步则是相反，<em>调用</em>在发出之后，这个调用就直接返回了，所以没有返回结果。换句话说，当一个异步过程调用发出后，调用者不会立刻得到结果。而是在<em>调用</em>发出后，<em>被调用者</em>通过状态、通知来通知调用者，或通过回调函数处理这个调用。典型的异步编程模型比如Node.js举个通俗的例子：你打电话问书店老板有没有《分布式系统》这本书，如果是同步通信机制，书店老板会说，你稍等，”我查一下”，然后开始查啊查，等查好了（可能是5秒，也可能是一天）告诉你结果（返回结果）。而异步通信机制，书店老板直接告诉你我查一下啊，查好了打电话给你，然后直接挂电话了（不返回结果）。然后查好了，他会主动打电话给你。在这里老板通过“回电”这种方式来回调。2. 阻塞与非阻塞阻塞和非阻塞关注的是程序在等待调用结果（消息，返回值）时的状态.阻塞调用是指调用结果返回之前，当前线程会被挂起。调用线程只有在得到结果之后才会返回。非阻塞调用指在不能立刻得到结果之前，该调用不会阻塞当前线程。还是上面的例子，你打电话问书店老板有没有《分布式系统》这本书，你如果是阻塞式调用，你会一直把自己“挂起”，直到得到这本书有没有的结果，如果是非阻塞式调用，你不管老板有没有告诉你，你自己先一边去玩了， 当然你也要偶尔过几分钟check一下老板有没有返回结果。在这里阻塞与非阻塞与是否同步异步无关。跟老板通过什么方式回答你结果无关。</p>
+<p>如果是关心blocking IO/ asynchronous IO, 参考  Unix Network Programming View Book<br><!--more--></p>
 
       
     </div>
@@ -156,7 +156,7 @@
         
 	<div id="comment">
 		<!-- 来必力City版安装代码 -->
-		<div id="lv-container" data-id="city" data-uid="MTAyMC8yOTQ4MS82MDQ5">
+		<div id="lv-container" data-id="city" data-uid="MTAyMC8zNDExNy8xMDY1NQ">
 		<script type="text/javascript">
 		   (function(d, s) {
 		       var j, e = d.getElementsByTagName(s)[0];
@@ -194,11 +194,6 @@
       </div>
     </a>
   
-  
-    <a href="/2017/05/03/测试分类功能/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">下一篇</strong>
-      <div class="article-nav-title">测试分类功能</div>
-    </a>
   
 </nav>
 
@@ -319,7 +314,7 @@
 
 
   <div style="display: none;">
-    <script src="https://s95.cnzz.com/z_stat.php?id=1260716016&web_id=1260716016" language="JavaScript"></script>
+    <script src="https://s95.cnzz.com/z_stat.php?id=1272904183&web_id=1272904183" language="JavaScript"></script>
   </div>
 
 
