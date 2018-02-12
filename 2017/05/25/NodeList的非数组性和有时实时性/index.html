@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>NodeList的非数组性和有时实时性 | Iron Man</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="DOMNodeList" />
+  
+  
+  
+  
+  <meta name="description" content="最近在重新复习以前学过的课程，大部分是基础的东西。 《JavaScript DOM 编程艺术》是一本经典的JavaScript入门书。去年年初怀着无线的憧憬刷过一遍，奈何后来买新房装修，耽误了大半年的时间，旧的知识不知不觉就忘了。 今年重整旗鼓，本来想直接看新书的，但做一些小项目经常出现基础不牢的情况。于是重走长征路，看过的书再刷一遍，做过的项目，用新技术重构一遍。 过去的一年node.js发展迅">
+<meta name="keywords" content="DOM,NodeList">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NodeList的非数组性和有时实时性">
+<meta property="og:url" content="https://wozhizui.github.io/2017/05/25/NodeList的非数组性和有时实时性/index.html">
+<meta property="og:site_name" content="Iron Man">
+<meta property="og:description" content="最近在重新复习以前学过的课程，大部分是基础的东西。 《JavaScript DOM 编程艺术》是一本经典的JavaScript入门书。去年年初怀着无线的憧憬刷过一遍，奈何后来买新房装修，耽误了大半年的时间，旧的知识不知不觉就忘了。 今年重整旗鼓，本来想直接看新书的，但做一些小项目经常出现基础不牢的情况。于是重走长征路，看过的书再刷一遍，做过的项目，用新技术重构一遍。 过去的一年node.js发展迅">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-02-12T09:27:45.192Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NodeList的非数组性和有时实时性">
+<meta name="twitter:description" content="最近在重新复习以前学过的课程，大部分是基础的东西。 《JavaScript DOM 编程艺术》是一本经典的JavaScript入门书。去年年初怀着无线的憧憬刷过一遍，奈何后来买新房装修，耽误了大半年的时间，旧的知识不知不觉就忘了。 今年重整旗鼓，本来想直接看新书的，但做一些小项目经常出现基础不牢的情况。于是重走长征路，看过的书再刷一遍，做过的项目，用新技术重构一遍。 过去的一年node.js发展迅">
+  
+    <link rel="alternate" href="/atom.xml" title="Iron Man" type="application/atom+xml">
+  
+  <link rel="icon" href="/css/images/favicon.ico">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+    
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Yanone+Kaffeesatz%3A200%2C300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+
+  <link rel="stylesheet" id="athemes-headings-fonts-css" href="//fonts.googleapis.com/css?family=Oswald%3A300%2C400%2C700&amp;ver=4.6.1" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="/js/jquery-3.1.1.min.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="/css/bootstrap.css" >
+  <link rel="stylesheet" href="/css/fashion.css" >
+  <link rel="stylesheet" href="/css/glyphs.css" >
+
+</head>
+
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  
+
+
+<header id="allheader" class="site-header" role="banner" 
+   >
+  <div class="clearfix container">
+      <div class="site-branding">
+
+          <h1 class="site-title">
+            
+              <a href="/" title="Iron Man" rel="home"> Iron Man </a>
+            
+          </h1>
+          
+          
+            
+          <nav id="main-navigation" class="main-navigation" role="navigation">
+            <a class="nav-open">Menu</a>
+            <a class="nav-close">Close</a>
+
+            <div class="clearfix sf-menu">
+              <ul id="main-nav" class="menu sf-js-enabled sf-arrows"  style="touch-action: pan-y;">
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/">首页</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/archives">归档</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/categories">分类</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/tags">标签</a> </li>
+                    
+                      <li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-1663"> <a class="" href="/about">关于</a> </li>
+                    
+              </ul>
+            </div>
+          </nav>
+
+      </div>
+  </div>
+</header>
+
+
+  <div id="container">
+    <div id="wrap">
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-NodeList的非数组性和有时实时性" style="width: 66%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="clearfix post-1016 post type-post status-publish format-standard has-post-thumbnail hentry category-template-2 category-uncategorized tag-codex tag-edge-case tag-featured-image tag-image tag-template">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      NodeList的非数组性和有时实时性
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2017/05/25/NodeList的非数组性和有时实时性/" class="article-date">
+	  <time datetime="2017-05-25T07:54:23.000Z" itemprop="datePublished">五月 25, 2017</time>
+	</a>
+
+       
+      
+	<span id="busuanzi_container_page_pv">
+	  本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+	</span>
+
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近在重新复习以前学过的课程，大部分是基础的东西。</p>
+<p>《JavaScript DOM 编程艺术》是一本经典的JavaScript入门书。去年年初怀着无线的憧憬刷过一遍，奈何后来买新房装修，耽误了大半年的时间，旧的知识不知不觉就忘了。</p>
+<p>今年重整旗鼓，本来想直接看新书的，但做一些小项目经常出现基础不牢的情况。于是重走长征路，看过的书再刷一遍，做过的项目，用新技术重构一遍。</p>
+<p>过去的一年node.js发展迅猛，去年哈尔滨应用这个技术的公司还相对较少，大部分都是PHP。今年以来，发现有了一些改变。加油吧，年轻人们。</p>
+<p>闲言够了，接下来写写最近重新复习《JavaScript DOM 编程艺术》时重新归纳的一个小知识点吧，真的是基础中的基础。</p>
+<h2 id=""><a href="#" class="headerlink" title=""></a><a id="more"></a></h2><h3 id="一、非数组特性"><a href="#一、非数组特性" class="headerlink" title="一、非数组特性"></a>一、非数组特性</h3><p>以下内容引用<a href="https://developer.mozilla.org/zh-CN/" target="_blank" rel="noopener">MDN</a>，这也是关于原生JavaScript最好的官方文档，没有之一。</p>
+<blockquote>
+<p>为什么 NodeList 不是数组？</p>
+<p>NodeList 对象在某些方面和数组非常相似，看上去可以直接使用从 Array.prototype 上继承的方法。然而，NodeList 没有这些类似数组的方法。</p>
+<p>JavaScript 的继承机制是基于原型的。数组元素之所以有一些数组方法（比如 forEach 和 map），是因为它的原型链上有这些方法，如下:</p>
+<p>myArray –&gt; Array.prototype –&gt; Object.prototype –&gt; null (想要获取一个对象的原型链，可以连续的调用 Object.getPrototypeOf，直到原型链尽头).</p>
+<p>forEach, map这些方式其实是 Array.prototype 这个对象的方法。</p>
+<p>和数组不一样，NodeList的原型链是这样的：</p>
+<p>myNodeList –&gt; NodeList.prototype –&gt; Object.prototype –&gt; null</p>
+<p>NodeList.prototype 只有一个 item 方法，没有 Array.prototype 上的那些方法，所以 NodeList 对象用不了它们。</p>
+</blockquote>
+<p>NodeList不是数组，这出乎我的意料。所以一定要记住，forEach、filter、map和reduce等方法就都不能用了，实际写代码要记住这个区别。</p>
+<p>当然可以通过原型链的方式扩展forEach，不过官方不推荐。</p>
+<ol>
+<li>扩展DOM对象的原型</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arrayMethods = <span class="built_in">Object</span>.getOwnPropertyNames( <span class="built_in">Array</span>.prototype );</span><br><span class="line"></span><br><span class="line">arrayMethods.forEach( attachArrayMethodsToNodeList );</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">attachArrayMethodsToNodeList</span>(<span class="params">methodName</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(methodName !== <span class="string">"length"</span>) &#123;</span><br><span class="line">	NodeList.prototype[methodName] = <span class="built_in">Array</span>.prototype[methodName];</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> divs = <span class="built_in">document</span>.getElementsByTagName( <span class="string">'div'</span> );</span><br><span class="line"><span class="keyword">var</span> firstDiv = divs[ <span class="number">0</span> ];</span><br><span class="line"></span><br><span class="line">firstDiv.childNodes.forEach(<span class="function"><span class="keyword">function</span>(<span class="params"> divChild </span>)</span>&#123;</span><br><span class="line">	divChild.parentNode.style.color = <span class="string">'#0F0'</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ol>
+<li>不扩展DOM对象的原型</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> forEach = <span class="built_in">Array</span>.prototype.forEach;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> divs = <span class="built_in">document</span>.getElementsByTagName( <span class="string">'div'</span> );</span><br><span class="line"><span class="keyword">var</span> firstDiv = divs[ <span class="number">0</span> ];</span><br><span class="line"></span><br><span class="line">forEach.call(firstDiv.childNodes, <span class="function"><span class="keyword">function</span>(<span class="params"> divChild </span>)</span>&#123;</span><br><span class="line">	divChild.parentNode.style.color = <span class="string">'#0F0'</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="二、有时实时"><a href="#二、有时实时" class="headerlink" title="二、有时实时"></a>二、有时实时</h3><p>大多数情况下，NodeList 对象都是个实时集合。意思是说，如果文档中的节点树发生变化，则已经存在的 NodeList 对象也可能会变化。例如，Node.childNodes 是实时的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> parent = <span class="built_in">document</span>.getElementById(<span class="string">'parent'</span>);</span><br><span class="line"><span class="keyword">var</span> child_nodes = parent.childNodes;</span><br><span class="line"><span class="built_in">console</span>.log(child_nodes.length); <span class="comment">// 如果假设结果是“2”</span></span><br><span class="line">parent.appendChild(<span class="built_in">document</span>.createElement(<span class="string">'div'</span>));</span><br><span class="line"><span class="built_in">console</span>.log(child_nodes.length); <span class="comment">// 此时的输出是“3”</span></span><br></pre></td></tr></table></figure>
+<p>在另一些情况下，NodeList 是一个静态集合，也就意味着随后对文档对象模型的任何改动都不会影响集合的内容。document.querySelectorAll 返回一个静态的 NodeList。</p>
+<p>特别是当你选择如何遍历 NodeList 中所有项，或缓存列表长度的时候，最好牢记这种区分。</p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/NodeList" target="_blank" rel="noopener">原文链接</a></p>
+
+      
+    </div>
+    <footer class="entry-meta entry-footer">
+      
+      
+  <span class="ico-tags"></span>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DOM/">DOM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NodeList/">NodeList</a></li></ul>
+
+      
+        
+	<div id="comment">
+		<!-- 来必力City版安装代码 -->
+		<div id="lv-container" data-id="city" data-uid="MTAyMC8zNDExNy8xMDY1NQ">
+		<script type="text/javascript">
+		   (function(d, s) {
+		       var j, e = d.getElementsByTagName(s)[0];
+
+		       if (typeof LivereTower === 'function') { return; }
+
+		       j = d.createElement(s);
+		       j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+		       j.async = true;
+
+		       e.parentNode.insertBefore(j, e);
+		   })(document, 'script');
+		</script>
+		<noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+		</div>
+		<!-- City版安装代码已完成 -->
+	</div>
+
+
+
+      
+    </footer>
+    <hr class="entry-footer-hr">
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/06/01/事件捕获和事件冒泡原理图/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          事件捕获和事件冒泡原理图
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/05/16/乱乱的原型链图/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">乱乱的原型链图</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="sidebar">
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    
+      <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#"><span class="nav-number">1.</span> <span class="nav-text"></span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、非数组特性"><span class="nav-number">1.1.</span> <span class="nav-text">一、非数组特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、有时实时"><span class="nav-number">1.2.</span> <span class="nav-text">二、有时实时</span></a></li></ol></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tags</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    <footer id="footer" class="site-footer">
+  
+
+  <div class="clearfix container">
+      <div class="site-info">
+	      &copy; 2018 Iron Man All Rights Reserved.
+        
+            <span id="busuanzi_container_site_uv">
+              本站访客数<span id="busuanzi_value_site_uv"></span>人次  
+              本站总访问量<span id="busuanzi_value_site_pv"></span>次
+            </span>
+          
+      </div>
+      <div class="site-credit">
+        Theme by <a href="https://github.com/iTimeTraveler/hexo-theme-hipaper" target="_blank">hipaper</a>
+      </div>
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var wrapdiv = document.getElementById("wrap");
+    var contentdiv = document.getElementById("content");
+
+    wrapdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("allheader").offsetHeight - document.getElementById("footer").offsetHeight + "px";
+
+
+    <!-- headerblur min height -->
+    
+    
+</script>
+    
+<div style="display: none;">
+  <script src="https://s11.cnzz.com/z_stat.php?id=1260716016&web_id=1260716016" language="JavaScript"></script>
+</div>
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+<script src="/js/bootstrap.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="https://s95.cnzz.com/z_stat.php?id=1272904183&web_id=1272904183" language="JavaScript"></script>
+  </div>
+
+
+
+	<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+	</script>
+
+
+
+
+
+
+  </div>
+
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js" async=""></script>
+</body>
+</html>
